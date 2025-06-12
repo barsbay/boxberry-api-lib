@@ -1,5 +1,9 @@
 # Руководство по использованию Boxberry API Library
 
+[![npm version](https://img.shields.io/npm/v/boxberry-api-lib.svg)](https://www.npmjs.com/package/boxberry-api-lib)
+
+Библиотека опубликована в npm: https://www.npmjs.com/package/boxberry-api-lib
+
 ## Содержание
 1. [Установка](#установка)
 2. [Базовое использование](#базовое-использование)
@@ -182,9 +186,9 @@ const calculation: DeliveryCalculation = await client.calculateDelivery({ /* ...
 
 ## Дополнительная информация
 
-- [GitHub репозиторий](https://github.com/your-username/boxberry-api-lib)
+- [GitHub репозиторий](https://github.com/barsbay/boxberry-api-lib/)
 - [npm пакет](https://www.npmjs.com/package/boxberry-api-lib)
 
 ## Поддержка
 
-Если у вас возникли вопросы или проблемы при использовании библиотеки, создайте issue в GitHub репозитории проекта. 
+Если у вас возникли вопросы или проблемы при использовании библиотеки, создайте issue в GitHub репозитории проекта: https://github.com/barsbay/boxberry-api-lib/issues 

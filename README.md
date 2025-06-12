@@ -1,12 +1,16 @@
 # Boxberry API Library
 
+[![npm version](https://img.shields.io/npm/v/boxberry-api-lib.svg)](https://www.npmjs.com/package/boxberry-api-lib)
+
 TypeScript library for working with Boxberry API.
 
-## Installation
+## Установка через npm
 
 ```bash
 npm install boxberry-api-lib
 ```
+
+Пакет доступен на npm: https://www.npmjs.com/package/boxberry-api-lib
 
 ## Usage
 
@@ -98,3 +102,7 @@ import { City, DeliveryPoint, Order, OrderStatus } from 'boxberry-api-lib';
 ## License
 
 MIT 
+
+[GitHub репозиторий](https://github.com/barsbay/boxberry-api-lib/)
+
+[issues](https://github.com/barsbay/boxberry-api-lib/issues) 
