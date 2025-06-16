@@ -1,132 +1,55 @@
 # Boxberry API Library
 
-[![npm version](https://img.shields.io/npm/v/boxberry-api-lib.svg)](https://www.npmjs.com/package/boxberry-api-lib)
+A TypeScript library for working with the Boxberry delivery service API.
 
-TypeScript library for working with Boxberry API.
-
-## Установка через npm
+## Installation
 
 ```bash
 npm install boxberry-api-lib
 ```
 
-Пакет доступен на npm: https://www.npmjs.com/package/boxberry-api-lib
-
-## Usage
+## Quick Start
 
 ```typescript
-import { BoxberryAPI } from 'boxberry-api-lib';
+import { BoxberryClient } from 'boxberry-api-lib';
 
-// Create API instance
-const api = new BoxberryAPI({
-  token: 'your_token'
+// Create client instance
+const client = new BoxberryClient({
+  token: 'YOUR_API_TOKEN',
+  debug: true // Enable debug mode for detailed logging
 });
 
-// Get list of cities
-const cities = await api.delivery.getCities();
+// Get list of delivery cities
+const cities = await client.delivery.getCities();
 
-// Get delivery points in city
-const points = await api.delivery.getDeliveryPoints('010');
+// Get list of delivery points
+const points = await client.delivery.getDeliveryPoints('Москва');
 
 // Calculate delivery cost
-const cost = await api.delivery.calculateDeliveryCost({
+const cost = await client.delivery.calculateDeliveryCost({
   weight: 1000,
-  targetstart: '010',
-  target: '19733',
+  target: 'Москва',
   ordersum: 1000,
-  deliverysum: 0,
-  paysum: 1000,
+  delivery_sum: 0,
+  pay_sum: 0,
   height: 10,
   width: 10,
   depth: 10
 });
-
-// Create order
-const order = await api.orders.createOrder({
-  order_id: 'TEST-123',
-  price: 1000,
-  payment_sum: 1000,
-  delivery_sum: 0,
-  vid: 1,
-  issue: 1,
-  customer: {
-    fio: 'John Doe',
-    phone: '9001234567'
-  },
-  items: [{
-    id: '1',
-    name: 'Product',
-    UnitName: 'pcs',
-    price: 1000,
-    quantity: 1
-  }],
-  weights: {
-    weight: 1000,
-    x: 10,
-    y: 10,
-    z: 10
-  }
-});
-
-// Get order status
-const status = await api.orders.getOrderStatus(order.track);
 ```
 
-## Modules
+## Features
 
-### DeliveryModule
+- Full TypeScript support
+- Detailed error handling
+- Debug mode for request/response logging
+- Support for all Boxberry API methods
+- Automatic response parsing
+- Type definitions for all API responses
 
-Module for working with delivery:
-- Get list of cities
-- Get delivery points
-- Calculate delivery cost
-- Check courier delivery availability
+## Documentation
 
-### OrdersModule
-
-Module for working with orders:
-- Create/update order
-- Get order status
-- Cancel order
-- Update order details
-- Update order storage date
-
-## Data Types
-
-The library provides TypeScript types for all API methods:
-
-```typescript
-import { City, DeliveryPoint, Order, OrderStatus } from 'boxberry-api-lib';
-```
-
-## Расширенные примеры
-
-```typescript
-import { BoxberryAPI, BoxberryCountryCode, BoxberryPoint, DeliveryProduct } from 'boxberry-api-lib';
-
-const api = new BoxberryAPI({ token: 'your_token' });
-
-// Получить список почтовых индексов для курьерской доставки
-const zips = await api.delivery.listCourierZips();
-
-// Получить список пунктов приёма посылок
-const parcelPoints: BoxberryPoint[] = await api.delivery.pointsForParcels();
-
-// Использование enum для поиска городов по стране
-const countryCode = BoxberryCountryCode.Kazakhstan;
-
-// Пример объекта товара для расчёта доставки
-const product: DeliveryProduct = {
-  weight: 1200,
-  height: 20,
-  width: 15,
-  depth: 10,
-  declaredValue: 3000,
-  name: 'Книга',
-  quantity: 1,
-  sku: 'BOOK-001'
-};
-```
+For detailed documentation and examples, see [GUIDE.md](GUIDE.md).
 
 ## License
 

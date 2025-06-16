@@ -1,31 +1,92 @@
 import { BoxberryClient } from '../client';
-import { Order, OrderStatus } from '../types';
+import { Order, OrderStatus, OrderUpdate } from '../types';
 
+/**
+ * Check if debug mode is enabled
+ * @returns {boolean} True if debug mode is enabled
+ */
+function isDebug() {
+  return process.env.DEBUG === '1' || process.env.DEBUG === 'true';
+}
+
+/**
+ * Module for working with Boxberry orders
+ */
 export class OrdersModule {
   constructor(private client: BoxberryClient) {}
 
   /**
-   * Create or update order
-   * @param order Order data
+   * Create a new order (ParselCreate)
+   * @param {Order} order - Order information
+   * @returns {Promise<any>} Created order information
    */
-  public async createOrder(order: Order): Promise<{ track: string }> {
-    const response = await this.client.post<{ track: string }>('', {
-      method: 'ParselCreate',
-      sdata: order
-    });
-    return response.data as { track: string };
+  public async createOrder(order: Order): Promise<any> {
+    try {
+      if (isDebug()) {
+        console.log('[Boxberry][Debug] Creating order with data:', order);
+      }
+
+      const response = await this.client.post<any>('', {
+        method: 'ParselCreate',
+        ...order
+      });
+
+      if (isDebug()) {
+        console.log('[Boxberry][Debug] Create order response:', response);
+      }
+
+      if (!response.success) {
+        console.error('[Boxberry][Error] Error creating order:', response.error);
+        return null;
+      }
+
+      if (!response.data) {
+        console.error('[Boxberry][Error] No data received when creating order');
+        return null;
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error('[Boxberry][Error] Unexpected error when creating order:', error);
+      return null;
+    }
   }
 
   /**
-   * Get order status
-   * @param track Tracking number
+   * Get order status (ParselStatus)
+   * @param {string} track - Order tracking number
+   * @returns {Promise<OrderStatus | null>} Order status information
    */
-  public async getOrderStatus(track: string): Promise<OrderStatus[]> {
-    const response = await this.client.get<OrderStatus[]>('', {
-      method: 'ListStatuses',
-      ImId: track
-    });
-    return response.data || [];
+  public async getOrderStatus(track: string): Promise<OrderStatus | null> {
+    try {
+      if (isDebug()) {
+        console.log('[Boxberry][Debug] Getting status for track:', track);
+      }
+
+      const response = await this.client.get<OrderStatus>('', {
+        method: 'ParselStatus',
+        track
+      });
+
+      if (isDebug()) {
+        console.log('[Boxberry][Debug] Get status response:', response);
+      }
+
+      if (!response.success) {
+        console.error('[Boxberry][Error] Error getting order status:', response.error);
+        return null;
+      }
+
+      if (!response.data) {
+        console.error('[Boxberry][Error] No data received when getting order status');
+        return null;
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error('[Boxberry][Error] Unexpected error when getting order status:', error);
+      return null;
+    }
   }
 
   /**
@@ -41,48 +102,100 @@ export class OrdersModule {
   }
 
   /**
-   * Cancel order
-   * @param track Tracking number
-   * @param cancelType Cancel type (1 - cancel delivery, 2 - delete order)
+   * Cancel order (ParselDel)
+   * @param {string} track - Order tracking number
+   * @returns {Promise<boolean>} True if order was cancelled
    */
-  public async cancelOrder(track: string, cancelType: 1 | 2 = 1): Promise<boolean> {
-    const response = await this.client.get<{ result: boolean }>('', {
-      method: 'CancelOrder',
-      track,
-      cancelType
-    });
-    return response.data?.result || false;
+  public async cancelOrder(track: string): Promise<boolean> {
+    try {
+      if (isDebug()) {
+        console.log('[Boxberry][Debug] Cancelling order with track:', track);
+      }
+
+      const response = await this.client.get<{ result: boolean }>('', {
+        method: 'ParselDel',
+        track
+      });
+
+      if (isDebug()) {
+        console.log('[Boxberry][Debug] Cancel order response:', response);
+      }
+
+      if (!response.success) {
+        console.error('[Boxberry][Error] Error cancelling order:', response.error);
+        return false;
+      }
+
+      return response.data?.result || false;
+    } catch (error) {
+      console.error('[Boxberry][Error] Unexpected error when cancelling order:', error);
+      return false;
+    }
   }
 
   /**
-   * Update order details
-   * @param track Tracking number
-   * @param data New order data
+   * Update order details (ParselUpdate)
+   * @param {OrderUpdate} order - Updated order information
+   * @returns {Promise<boolean>} True if order was updated
    */
-  public async updateOrderDetails(track: string, data: {
-    fio?: string;
-    phone?: string;
-    email?: string;
-  }): Promise<boolean> {
-    const response = await this.client.get<{ result: boolean }>('', {
-      method: 'ChangeOrderDetails',
-      track,
-      ...data
-    });
-    return response.data?.result || false;
+  public async updateOrder(order: OrderUpdate): Promise<boolean> {
+    try {
+      if (isDebug()) {
+        console.log('[Boxberry][Debug] Updating order with data:', order);
+      }
+
+      const response = await this.client.post<{ result: boolean }>('', {
+        method: 'ParselUpdate',
+        ...order
+      });
+
+      if (isDebug()) {
+        console.log('[Boxberry][Debug] Update order response:', response);
+      }
+
+      if (!response.success) {
+        console.error('[Boxberry][Error] Error updating order:', response.error);
+        return false;
+      }
+
+      return response.data?.result || false;
+    } catch (error) {
+      console.error('[Boxberry][Error] Unexpected error when updating order:', error);
+      return false;
+    }
   }
 
   /**
-   * Update order storage date
-   * @param track Tracking number
-   * @param storageDate New storage date in DD.MM.YYYY format
+   * Update order storage date (ParselStorageDate)
+   * @param {string} track - Order tracking number
+   * @param {string} date - New storage date (YYYY-MM-DD)
+   * @returns {Promise<boolean>} True if storage date was updated
    */
-  public async updateOrderStorageDate(track: string, storageDate: string): Promise<boolean> {
-    const response = await this.client.get<{ result: boolean }>('', {
-      method: 'ChangeOrderStorageDate',
-      track,
-      storageDate
-    });
-    return response.data?.result || false;
+  public async updateOrderStorageDate(track: string, date: string): Promise<boolean> {
+    try {
+      if (isDebug()) {
+        console.log('[Boxberry][Debug] Updating storage date:', { track, date });
+      }
+
+      const response = await this.client.get<{ result: boolean }>('', {
+        method: 'ParselStorageDate',
+        track,
+        date
+      });
+
+      if (isDebug()) {
+        console.log('[Boxberry][Debug] Update storage date response:', response);
+      }
+
+      if (!response.success) {
+        console.error('[Boxberry][Error] Error updating order storage date:', response.error);
+        return false;
+      }
+
+      return response.data?.result || false;
+    } catch (error) {
+      console.error('[Boxberry][Error] Unexpected error when updating order storage date:', error);
+      return false;
+    }
   }
 } 

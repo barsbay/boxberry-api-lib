@@ -1,14 +1,27 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { BoxberryConfig, BoxberryResponse } from './types';
+import { OrdersModule } from './modules/orders';
 
+/**
+ * Check if debug mode is enabled
+ * @returns {boolean} True if debug mode is enabled
+ */
 function isDebug() {
   return process.env.DEBUG === '1' || process.env.DEBUG === 'true';
 }
 
+/**
+ * Boxberry API client for making HTTP requests
+ */
 export class BoxberryClient {
   private client: AxiosInstance;
   private config: BoxberryConfig;
+  public orders: OrdersModule;
 
+  /**
+   * Create a new Boxberry API client
+   * @param {BoxberryConfig} config - Configuration object
+   */
   constructor(config: BoxberryConfig) {
     this.config = {
       baseUrl: 'https://api.boxberry.ru/json.php',
@@ -24,8 +37,13 @@ export class BoxberryClient {
     });
 
     this.setupInterceptors();
+    this.orders = new OrdersModule(this);
   }
 
+  /**
+   * Setup request and response interceptors
+   * @private
+   */
   private setupInterceptors(): void {
     this.client.interceptors.request.use(
       (config) => {
@@ -78,7 +96,22 @@ export class BoxberryClient {
         }
         if (error.response) {
           // Handle API errors
-          const errorMessage = error.response.data?.error || 'Unknown error';
+          const errorData = error.response.data;
+          let errorMessage = 'Unknown error';
+          
+          if (typeof errorData === 'object' && errorData !== null) {
+            if ('err' in errorData) {
+              errorMessage = errorData.err;
+            } else if ('error' in errorData) {
+              errorMessage = errorData.error;
+            }
+          } else if (typeof errorData === 'string') {
+            errorMessage = errorData;
+          }
+
+          // Add HTTP status code to error message
+          errorMessage = `[${error.response.status}] ${errorMessage}`;
+          
           return Promise.reject(new Error(errorMessage));
         }
         return Promise.reject(error);
@@ -86,10 +119,37 @@ export class BoxberryClient {
     );
   }
 
+  /**
+   * Make an HTTP request
+   * @param {AxiosRequestConfig} config - Request configuration
+   * @returns {Promise<BoxberryResponse<T>>} Response data
+   */
   public async request<T>(config: AxiosRequestConfig): Promise<BoxberryResponse<T>> {
     try {
       const response = await this.client.request(config);
-      return response.data;
+      const data = response.data;
+      
+      // Check if response is an array or data object
+      if (Array.isArray(data)) {
+        return {
+          success: true,
+          data: data as T
+        };
+      }
+      
+      // If it's an object with error field, return error
+      if (data && typeof data === 'object' && 'error' in data) {
+        return {
+          success: false,
+          error: data.error
+        };
+      }
+      
+      // Otherwise return success with data
+      return {
+        success: true,
+        data: data as T
+      };
     } catch (error) {
       if (error instanceof Error) {
         return {
@@ -104,6 +164,12 @@ export class BoxberryClient {
     }
   }
 
+  /**
+   * Make a GET request
+   * @param {string} url - Request URL
+   * @param {Record<string, unknown>} params - Query parameters
+   * @returns {Promise<BoxberryResponse<T>>} Response data
+   */
   public get<T>(url: string, params?: Record<string, unknown>): Promise<BoxberryResponse<T>> {
     return this.request<T>({
       method: 'GET',
@@ -112,6 +178,12 @@ export class BoxberryClient {
     });
   }
 
+  /**
+   * Make a POST request
+   * @param {string} url - Request URL
+   * @param {unknown} data - Request body
+   * @returns {Promise<BoxberryResponse<T>>} Response data
+   */
   public post<T>(url: string, data?: unknown): Promise<BoxberryResponse<T>> {
     return this.request<T>({
       method: 'POST',

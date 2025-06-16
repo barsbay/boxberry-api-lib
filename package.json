@@ -18,7 +18,8 @@
     "preversion": "npm run lint",
     "version": "",
     "postversion": "git push && git push --tags",
-    "runexample": "ts-node example.ts"
+    "exampledelivery": "ts-node delivery.example.ts",
+    "exampleorders": "ts-node order.example.ts"
   },
   "repository": {
     "type": "git",

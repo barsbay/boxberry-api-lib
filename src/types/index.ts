@@ -1,14 +1,24 @@
+/**
+ * Boxberry API configuration
+ */
 export interface BoxberryConfig {
   token: string;
   baseUrl?: string;
+  debug?: boolean;
 }
 
+/**
+ * Boxberry API response wrapper
+ */
 export interface BoxberryResponse<T> {
   success: boolean;
   error?: string;
   data?: T;
 }
 
+/**
+ * Delivery point information
+ */
 export interface DeliveryPoint {
   code: string;
   name: string;
@@ -21,20 +31,30 @@ export interface DeliveryPoint {
   };
 }
 
+/**
+ * City information
+ */
 export interface City {
   code: string;
   name: string;
   region: string;
 }
 
+/**
+ * Delivery cost information
+ */
 export interface DeliveryCost {
   price: number;
   deliveryPeriod: number;
   deliveryDate: string;
 }
 
+/**
+ * Order information
+ */
 export interface Order {
   order_id: string;
+  track?: string;      // Tracking number
   price: number;
   payment_sum: number;
   delivery_sum: number;
@@ -63,6 +83,44 @@ export interface Order {
   };
 }
 
+/**
+ * Order update information
+ * All fields are optional except track
+ */
+export interface OrderUpdate {
+  track: string;      // Required tracking number
+  order_id?: string;
+  price?: number;
+  payment_sum?: number;
+  delivery_sum?: number;
+  vid?: number;
+  issue?: number;
+  customer?: {
+    fio?: string;
+    phone?: string;
+    phone2?: string;
+    email?: string;
+  };
+  items?: Array<{
+    id: string;
+    name: string;
+    UnitName: string;
+    nds?: string;
+    price: number;
+    quantity: number;
+    marking_crpt?: string;
+  }>;
+  weights?: {
+    weight: number;
+    x: number;
+    y: number;
+    z: number;
+  };
+}
+
+/**
+ * Order status information
+ */
 export interface OrderStatus {
   ImId: string;
   status: string;
@@ -71,14 +129,14 @@ export interface OrderStatus {
 }
 
 /**
- * Коды стран Boxberry для поиска городов и ПВЗ.
- * 643 – Россия
- * 398 – Казахстан
- * 112 – Беларусь
- * 417 - Киргизия
- * 51 - Армения
- * 762 - Таджикистан
- * 860 - Узбекистан
+ * Boxberry country codes for city and delivery point search
+ * 643 - Russia
+ * 398 - Kazakhstan
+ * 112 - Belarus
+ * 417 - Kyrgyzstan
+ * 51 - Armenia
+ * 762 - Tajikistan
+ * 860 - Uzbekistan
  */
 export enum BoxberryCountryCode {
   Russia = 643,
@@ -91,8 +149,8 @@ export enum BoxberryCountryCode {
 }
 
 /**
- * Тип для пункта выдачи заказов (ПВЗ) Boxberry.
- * Code — обязательный, остальные поля опциональны.
+ * Boxberry delivery point (PVD) type
+ * Code is required, other fields are optional
  */
 export interface BoxberryPoint {
   Code: string;
@@ -126,35 +184,35 @@ export interface BoxberryPoint {
 }
 
 /**
- * Тип для товара, используемого при расчёте доставки.
+ * Product type for delivery cost calculation
  */
 export interface DeliveryProduct {
-  /** Вес в граммах */
+  /** Weight in grams */
   weight: number;
-  /** Высота в см */
+  /** Height in centimeters */
   height: number;
-  /** Ширина в см */
+  /** Width in centimeters */
   width: number;
-  /** Глубина в см */
+  /** Depth in centimeters */
   depth: number;
-  /** Объявленная стоимость (страховая) */
+  /** Declared value (insurance) */
   declaredValue: number;
-  /** Стоимость доставки (если требуется) */
+  /** Delivery cost (if required) */
   deliverySum?: number;
-  /** Сумма к оплате с получателя (если требуется) */
+  /** Payment amount from recipient (if required) */
   paySum?: number;
-  /** Описание товара */
+  /** Product description */
   description?: string;
-  /** Наименование товара */
+  /** Product name */
   name?: string;
-  /** Количество */
+  /** Quantity */
   quantity?: number;
-  /** Артикул или SKU */
+  /** SKU or article number */
   sku?: string;
 }
 
 /**
- * Тип для курьерского индекса Boxberry (ListZips)
+ * Boxberry courier zip code type (ListZips)
  */
 export interface BoxberryCourierZip {
   Zip: string;
