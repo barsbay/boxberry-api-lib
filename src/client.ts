@@ -1,6 +1,10 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { BoxberryConfig, BoxberryResponse } from './types';
 
+function isDebug() {
+  return process.env.DEBUG === '1' || process.env.DEBUG === 'true';
+}
+
 export class BoxberryClient {
   private client: AxiosInstance;
   private config: BoxberryConfig;
@@ -31,18 +35,47 @@ export class BoxberryClient {
         } else {
           config.params = { token: this.config.token };
         }
+        if (isDebug()) {
+          console.log('[Boxberry][Request]', {
+            url: config.url,
+            method: config.method,
+            params: config.params,
+            data: config.data
+          });
+        }
         return config;
       },
       (error) => {
+        if (isDebug()) {
+          console.error('[Boxberry][Request][Error]', error);
+        }
         return Promise.reject(error);
       }
     );
 
     this.client.interceptors.response.use(
       (response) => {
+        if (isDebug()) {
+          console.log('[Boxberry][Response]', {
+            url: response.config.url,
+            status: response.status,
+            data: response.data
+          });
+        }
         return response;
       },
       (error) => {
+        if (isDebug()) {
+          if (error.response) {
+            console.error('[Boxberry][Response][Error]', {
+              url: error.response.config.url,
+              status: error.response.status,
+              data: error.response.data
+            });
+          } else {
+            console.error('[Boxberry][Response][Error]', error);
+          }
+        }
         if (error.response) {
           // Handle API errors
           const errorMessage = error.response.data?.error || 'Unknown error';
@@ -71,7 +104,7 @@ export class BoxberryClient {
     }
   }
 
-  public get<T>(url: string, params?: Record<string, any>): Promise<BoxberryResponse<T>> {
+  public get<T>(url: string, params?: Record<string, unknown>): Promise<BoxberryResponse<T>> {
     return this.request<T>({
       method: 'GET',
       url,
@@ -79,7 +112,7 @@ export class BoxberryClient {
     });
   }
 
-  public post<T>(url: string, data?: any): Promise<BoxberryResponse<T>> {
+  public post<T>(url: string, data?: unknown): Promise<BoxberryResponse<T>> {
     return this.request<T>({
       method: 'POST',
       url,

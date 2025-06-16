@@ -99,6 +99,35 @@ The library provides TypeScript types for all API methods:
 import { City, DeliveryPoint, Order, OrderStatus } from 'boxberry-api-lib';
 ```
 
+## Расширенные примеры
+
+```typescript
+import { BoxberryAPI, BoxberryCountryCode, BoxberryPoint, DeliveryProduct } from 'boxberry-api-lib';
+
+const api = new BoxberryAPI({ token: 'your_token' });
+
+// Получить список почтовых индексов для курьерской доставки
+const zips = await api.delivery.listCourierZips();
+
+// Получить список пунктов приёма посылок
+const parcelPoints: BoxberryPoint[] = await api.delivery.pointsForParcels();
+
+// Использование enum для поиска городов по стране
+const countryCode = BoxberryCountryCode.Kazakhstan;
+
+// Пример объекта товара для расчёта доставки
+const product: DeliveryProduct = {
+  weight: 1200,
+  height: 20,
+  width: 15,
+  depth: 10,
+  declaredValue: 3000,
+  name: 'Книга',
+  quantity: 1,
+  sku: 'BOOK-001'
+};
+```
+
 ## License
 
 MIT 
