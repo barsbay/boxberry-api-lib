@@ -1,5 +1,5 @@
 import { BoxberryClient } from '../client';
-import { City, DeliveryPoint, BoxberryPoint, BoxberryCourierZip, BoxberryResponse } from '../types';
+import { City, DeliveryPoint, BoxberryPoint, BoxberryCourierZip } from '../types';
 
 /**
  * Module for working with Boxberry delivery services
@@ -76,30 +76,15 @@ export class DeliveryModule {
    * @param {number} params.width - Width in centimeters
    * @param {number} params.depth - Depth in centimeters
    * @param {string} [params.zip] - Postal code
-   * @returns {Promise<any>} Delivery cost information
+   * @returns {Promise<unknown>} Delivery cost information
    */
-  public async calculateDeliveryCost(params: {
-    weight: number;
-    targetstart: string;
-    target: string;
-    ordersum: number;
-    deliverysum: number;
-    paysum: number;
-    height: number;
-    width: number;
-    depth: number;
-    zip?: string;
-  }): Promise<any> {
-    const response = await this.client.get<any>('', {
+  public async calculateDeliveryCost(params: Record<string, unknown>): Promise<unknown> {
+    const response = await this.client.get<unknown>('', {
       method: 'DeliveryCosts',
       ...params
     });
-    if (!response.success) {
-      console.error('[Boxberry][Error] Error calculating delivery cost:', response.error);
-      return null;
-    }
     if (process.env.DEBUG === '1' || process.env.DEBUG === 'true') {
-      console.log('[DEBUG] DeliveryCosts response:', response.data);
+      console.log('[DEBUG] Ответ DeliveryCosts:', response.data);
     }
     return response.data;
   }

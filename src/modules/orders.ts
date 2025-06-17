@@ -1,5 +1,5 @@
 import { BoxberryClient } from '../client';
-import { Order, OrderStatus, OrderUpdate } from '../types';
+import { OrderStatus } from '../types';
 
 /**
  * Check if debug mode is enabled
@@ -18,15 +18,15 @@ export class OrdersModule {
   /**
    * Create a new order (ParselCreate)
    * @param {Order} order - Order information
-   * @returns {Promise<any>} Created order information
+   * @returns {Promise<unknown>} Created order information
    */
-  public async createOrder(order: Order): Promise<any> {
+  public async createOrder(order: Record<string, unknown>): Promise<unknown> {
     try {
       if (isDebug()) {
         console.log('[Boxberry][Debug] Creating order with data:', order);
       }
 
-      const response = await this.client.post<any>('', {
+      const response = await this.client.post<unknown>('', {
         method: 'ParselCreate',
         ...order
       });
@@ -136,32 +136,28 @@ export class OrdersModule {
   /**
    * Update order details (ParselUpdate)
    * @param {OrderUpdate} order - Updated order information
-   * @returns {Promise<boolean>} True if order was updated
+   * @returns {Promise<unknown>} True if order was updated
    */
-  public async updateOrder(order: OrderUpdate): Promise<boolean> {
+  public async updateOrder(order: Record<string, unknown>): Promise<unknown> {
     try {
       if (isDebug()) {
         console.log('[Boxberry][Debug] Updating order with data:', order);
       }
-
-      const response = await this.client.post<{ result: boolean }>('', {
+      const response = await this.client.post<unknown>('', {
         method: 'ParselUpdate',
         ...order
       });
-
-      if (isDebug()) {
-        console.log('[Boxberry][Debug] Update order response:', response);
-      }
-
       if (!response.success) {
         console.error('[Boxberry][Error] Error updating order:', response.error);
-        return false;
+        return undefined;
       }
-
-      return response.data?.result || false;
+      if (typeof response.data === 'object' && response.data !== null && 'result' in response.data) {
+        return (response.data as { result: boolean }).result;
+      }
+      return response.data;
     } catch (error) {
-      console.error('[Boxberry][Error] Unexpected error when updating order:', error);
-      return false;
+      console.error('[Boxberry][Error] Exception updating order:', error);
+      return undefined;
     }
   }
 

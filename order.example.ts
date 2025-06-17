@@ -67,10 +67,7 @@ async function main() {
     console.log('Updated order:', updatedOrder);
 
     // Update order storage date
-    const storageDate = await api.orders.updateOrderStorageDate({
-      track: order.track,
-      storage_date: '2024-03-20'
-    });
+    const storageDate = await api.orders.updateOrderStorageDate('TRACK_NUMBER', '2024-06-10');
     console.log('Updated storage date:', storageDate);
 
     // Cancel order
